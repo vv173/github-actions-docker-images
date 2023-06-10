@@ -3,12 +3,14 @@ name: Docker Image CI with Snyk
 on:
   push:
     branches: ["main"]
+    tags:
+      - 'v*'
   workflow_dispatch:
 #   pull_request:
 #     branches: [ "main" ]
 
 env:
-  IMAGE_TAG: app-snyk:v0.0.1
+  IMAGE_NAME: app-snyk
   GITHUB_REGISTRY: ghcr.io
 
 jobs:
@@ -17,6 +19,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -30,9 +41,9 @@ jobs:
           context: .
           file: ./Dockerfile
           load: true
-          tags: ${{ env.IMAGE_TAG }}
+          tags: ${{ env.IMAGE_NAME }}
           push: false
-          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_TAG }}${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_TAG }}
+          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           cache-to: type=inline
 
       - name: Run Snyk to check Docker image for vulnerabilities
@@ -41,7 +52,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: ${{ env.IMAGE_TAG }}
+          image: ${{ env.IMAGE_NAME }}
           # snyk scan will fail only if critical vulnerability is found
           args: --file=Dockerfile --sarif-file-output=snyk.sarif --severity-threshold=critical --fail-on=all
 
@@ -64,6 +75,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_TAG }}
-          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_TAG }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           cache-to: type=inline
