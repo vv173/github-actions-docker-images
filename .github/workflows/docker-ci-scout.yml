@@ -25,7 +25,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+            ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=ref,event=branch
@@ -56,7 +56,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
           cache-to: type=inline
 
 
@@ -66,7 +66,7 @@ jobs:
         with:
           command: compare
           image: ${{ steps.meta.outputs.tags }}
-          to: ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+          to: ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
           ignore-unchanged: true
           only-severities: critical,high
           token: ${{ secrets.DOCKER_PAT }}
