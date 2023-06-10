@@ -1,13 +1,13 @@
 name: Docker Image CI with Scout
 
 on:
-  # push:
-  #   branches: ["main"]
-  #   tags:
-  #     - "v*"
+  push:
+    branches: ["main"]
+    tags:
+      - "v*"
   workflow_dispatch:
-  # pull_request:
-  #   branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 env:
   IMAGE_NAME: app-scout
@@ -59,14 +59,12 @@ jobs:
           cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
           cache-to: type=inline
 
-
-      - name: Docker Scout
+      - name: Docker Scount
         id: docker-scout
         uses: docker/scout-action@dd36f5b0295baffa006aa6623371f226cc03e506
         with:
-          command: compare
+          command: cves
           image: ${{ steps.meta.outputs.tags }}
-          to: ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
-          ignore-unchanged: true
           only-severities: critical,high
+          exit-code: true
           token: ${{ secrets.DOCKER_PAT }}
