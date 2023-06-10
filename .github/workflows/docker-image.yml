@@ -41,6 +41,8 @@ jobs:
         file: ./Dockerfile
         load: true
         tags: ${{ env.SCAN_TAG }}
+        cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ env.PRODUCTION_TAG }}
+        cache-to: type=inline
 
     - name: Run Snyk to check Docker image for vulnerabilities
       continue-on-error: true
@@ -64,5 +66,5 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: ${{ env.GITHUB_REGISTRY }}/${{ env.PRODUCTION_TAG }}
-        cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ env.PRODUCTION_TAG }}
+        cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ env.PRODUCTION_TAG }}
         cache-to: type=inline
