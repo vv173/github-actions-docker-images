@@ -12,6 +12,7 @@ on:
 env:
   IMAGE_NAME: app-snyk
   GITHUB_REGISTRY: ghcr.io
+  #RUN_NUMBER: ${GITHUB_RUN_NUMBER}
 
 jobs:
   build-scan-push:
@@ -27,7 +28,7 @@ jobs:
           images: |
             ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}.${GITHUB_RUN_NUMBER}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -43,7 +44,7 @@ jobs:
           load: true
           tags: ${{ env.IMAGE_NAME }}
           push: false
-          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           cache-to: type=inline
 
       - name: Run Snyk to check Docker image for vulnerabilities
