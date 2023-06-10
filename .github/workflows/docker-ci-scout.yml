@@ -67,4 +67,3 @@ jobs:
           image: ${{ steps.meta.outputs.tags }}
           only-severities: critical,high
           exit-code: true
-          token: ${{ secrets.DOCKER_PAT }}
