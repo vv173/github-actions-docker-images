@@ -4,10 +4,10 @@ on:
   push:
     branches: ["main"]
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   IMAGE_NAME: app-scout
@@ -46,17 +46,17 @@ jobs:
           context: .
           file: ./Dockerfile
           load: true
-          tags: ${{ env.IMAGE_NAME }}
+          tags: local/${{ env.IMAGE_NAME }}
           push: false
           cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
           cache-to: type=inline
-      
+
       - name: Docker Scout
         id: docker-scout
         uses: docker/scout-action@dd36f5b0295baffa006aa6623371f226cc03e506
         with:
           command: compare
-          image: ${{ env.IMAGE_NAME }}
+          image: local/${{ env.IMAGE_NAME }}
           to: ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
           ignore-unchanged: true
           only-severities: critical,high
