@@ -25,7 +25,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+            ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=ref,event=branch
@@ -48,7 +48,7 @@ jobs:
           load: true
           tags: ${{ env.IMAGE_NAME }}
           push: false
-          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           cache-to: type=inline
 
       - name: Run Snyk to check Docker image for vulnerabilities
@@ -82,5 +82,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           cache-to: type=inline
