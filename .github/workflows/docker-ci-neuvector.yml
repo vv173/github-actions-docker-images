@@ -10,7 +10,7 @@ on:
     branches: ["main"]
 
 env:
-  IMAGE_NAME: app-snyk
+  IMAGE_NAME: app-neuvector
   GITHUB_REGISTRY: ghcr.io
 
 jobs:
@@ -77,3 +77,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           cache-to: type=inline
+
+      - name: Scan Remote Image
+        uses: neuvector/scan-action@main
+        with:
+          image-registry: https://${{ env.GITHUB_REGISTRY }}
+          image-registry-username: ${{ github.actor }}
+          image-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-repository: ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          image-tag: ${{ steps.meta.outputs.version }}
+          min-high-cves-to-fail: "10"
+          min-medium-cves-to-fail: "20"
