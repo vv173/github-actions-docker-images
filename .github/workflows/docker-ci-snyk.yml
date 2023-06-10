@@ -28,7 +28,8 @@ jobs:
           images: |
             ${{ env.GITHUB_REGISTRY }}/${{ github.actor }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{major}}.{{minor}},value=${{github.run_number}}
+            type=semver,pattern={{major}}.{{minor}},value=${{github.run_number}}.{{patch}}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
             type=semver,pattern={{major}}
 
       - name: Set up QEMU
