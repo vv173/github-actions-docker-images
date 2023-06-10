@@ -2,9 +2,9 @@ name: Docker Image CI with Scout
 
 on:
   # push:
-    # branches: ["main"]
-    # tags:
-    #   - "v*"
+  # branches: ["main"]
+  # tags:
+  #   - "v*"
   workflow_dispatch:
   # pull_request:
   #   branches: ["main"]
