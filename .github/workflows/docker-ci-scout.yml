@@ -1,7 +1,7 @@
 name: Docker Image CI with Scout
 
 on:
-  push:
+  # push:
     # branches: ["main"]
     # tags:
     #   - "v*"

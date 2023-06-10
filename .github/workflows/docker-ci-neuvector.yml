@@ -88,3 +88,4 @@ jobs:
           image-tag: ${{ steps.meta.outputs.version }}
           min-high-cves-to-fail: "10"
           min-medium-cves-to-fail: "20"
+          output: csv
