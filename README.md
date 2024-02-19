@@ -1,70 +1,14 @@
-# Getting Started with Create React App
+## Repozytorium zawiera w sobie trzy pliki workflow. Każdy z tych workflow do GitHub Action buduje obraz, skanuje podatności CVE jednym z trzech narzędzi oraz wrzuca zbudowany obrazy do github registry.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+1) **Plik docker-ci-snyk.yml. (Job: Docker Image CI with Snyk)**
+Job pobiera zawartość repozytorium poprzez checkout. Uruchamia qemu oraz silnik buildx do budowania obrazów wieloplatformowych. Najpierw zostaje zbudowany obraz lokalnie (w github) bez określonej architektury. Następnie obraz zostanie przeskanowany narzędziem scout, w przypadku wykrycia przynajmniej jednej podatności krytycznej, job zostanie przerwany. Pod czas skanowania obrazu zostanie wygenerowany raport w formacie sarif, który później będzie wrzucony do github reports. Dalej „Job” loguje się do ghcr.io. Ostatnim krokiem jest budowanie obrazu „app-snyk” dla platform x86_64 oraz arm64 i push obrazu do registry. Cache obrazu jest zapisywany w trybie inline.
 
-## Available Scripts
+*Ten workflow nie buduje obrazu dla platformy x86_64 dwukrotnie. Obraz jest budowany raz, a kolejne kroki wykorzystują wewnętrzną pamięć podręczną z pierwszego kroku "Build and push". Drugi krok "Build and push" buduje tylko obraz dla platformy arm64.*
 
-In the project directory, you can run:
+2) **Plik docker-ci-scout.yml (Job: Docker Image CI with Scout)**
+Job pobiera zawartość repozytorium poprzez checkout. Uruchamia qemu oraz silnik buildx do budowania obrazów wieloplatformowych. Następnie „Job” loguje się do ghcr.io. Następuje budowanie obrazu „app-scout” dla platform x86_64 oraz arm64 i push obrazu do registry. Ostatnim krokiem jest porównywanie obrazu zbudowanego lokalnie do obrazu z registry za pomocą narzędzia docker scout. Obecnie podane rozwiązanie nie działa poprawnie, ponieważ docker scout nie jest w stanie połączyć się z ghcr.io. Prawdopodobnie problem występuje po stronie „action” jako rozwiązanie należy zamienić gotowy action poleceniem w cli.
 
-### `npm start`
+3) **Plik docker-ci-neuvector.yml (Job: Docker Image CI with NeuVector)**
+Job działa w dokładnie taki samy sposób jak „Docker Image CI with Snyk”. Różnie się tylko tym, że skanowanie obrazu jest przeprowadzane dwa razy. Pierwszy raz jest skanowany obraz zbudowany lokalnie, za drugim razem skanowany jest obraz z zdalnego registry.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+*Tagowanie obrazu zgodne ze schematem SemVer rozwiązałem za pomocą metadata-action. Metadata-action pobiera metadane z referencji Git i zdarzeń GitHub. Na podstawie tych danych zostaną wygenerowane tagi do obrazów Docker. W moim przypadku, jeśli job został uruchomiony z powodu nowego taga obrazu będzie nadany dokładnie taka sama wersja. Jeżeli job został uruchomiony poprzez push do branchu albo pull request, obraz zostanie otagowany nazwą branchu.*
